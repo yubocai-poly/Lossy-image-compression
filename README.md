@@ -34,7 +34,7 @@ The goal of this project is to write a JPEG-like image encoder/decoder. This is 
 
 
 
-### Contributors
+## Contributors
 
 This project exists thanks to all the people who contribute. 
 <a href="https://github.com/yubocai-poly/CSE102-Advanced-Programming-Fianl-Project/network/dependencies)"><img src="https://opencollective.com/standard-readme/contributors.svg?width=890&button=false" /></a>
