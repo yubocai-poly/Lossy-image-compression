@@ -1,6 +1,6 @@
 # CSE102-Advanced-Programming-Final-Project
 
-### Project Instruction
+## Project Instruction
 The goal of this project is to develop a lossy image compression format close to JPEG. Lossy compression algorithms allow to greatly reduce the size of image files at the price of loosing some data from the original image. In general, a lossy image compression works by pruning the information the human eye is not sensible to. This is the case, for instance, in the JPEG file format.
 
 The JPEG compression algorithm can be decomposed into several steps:
@@ -19,7 +19,7 @@ The JPEG compression algorithm can be decomposed into several steps:
 
 - Finally, each block is coded using a variation of the Run-length encoding associated with an arithmetic coding – both are lossless data compression algorithm.
 
-### Project Schedule
+## Project Schedule
 The goal of this project is to write a JPEG-like image encoder/decoder. This is a 3-week project:
 
 - during the first week, we will focus on:
