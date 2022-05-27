@@ -1,42 +1,19 @@
 """
 Yubo Cai
-CSE102
-Final Project - Part 1
-2022.05.16
+CSE102 - Advanced Programming
+Final Project - Lossy image compression
+2022.05.16 - 2022.06.20
 """
 
 ################################################ The PPM input format ################################################
 
 import math
+import random
+import numpy as np
 
 
 # Exercise 1_1
 def ppm_tokenize(stream):
-    """ 
-    Input: 'test.ppm'
-    Output: P3
-            3
-            2
-            255
-            255
-            0
-            0
-            0
-            255
-            0
-            0
-            0
-            255
-            255
-            255
-            0
-            255
-            255
-            255
-            0
-            0
-            0
-    """
     s = stream.readlines()
     # we want to get rid of all the content after the '#'
     lis = []
@@ -125,7 +102,6 @@ def test1_2():
 
 
 # Exercise 1_3
-# 应该是ppm_save(w, h, img, stream) stream 是输入内的文件名， 然后来去输出相同的文件ppm
 def ppm_save(w, h, img, outfile):
     """ 
     Input: 'test.ppm'
@@ -256,15 +232,10 @@ def test2_3():
 # Exercise 2_4
 def img_YCbCr2RGB(Y, Cb, Cr):
     """ 
-    Input: ([[76, 150, 29], 
-             [226, 255, 0]], 
-            
-            [[85, 44, 255], 
-             [0, 128, 128]], 
+    Input: ([[76, 150, 29], [226, 255, 0]], 
+            [[85, 44, 255], [0, 128, 128]], 
+            [[255, 21, 107], [149, 128, 128]])
              
-            [[255, 21, 107], 
-             [149, 128, 128]])
-    Output: [[(255, 0, 0), (0, 255, 0), (0, 0, 255)], [(255, 255, 0), (255, 255, 255), (0, 0, 0)]]
     Output: [[(254, 0, 0), (0, 255, 1), (0, 0, 254)], [(255, 255, 0), (255, 255, 255), (0, 0, 0)]]
     """
     # inverse function of img_RGB2YCbCr
@@ -360,8 +331,8 @@ def subsampling(w, h, C, a, b):
                 h1 = min_h - row
                 matrix[-1].append(ave_num(sum, w1, h1))
             else:
-                for i in range(a):
-                    for j in range(b):
+                for i in range(b):
+                    for j in range(a):
                         sum += C[row + i][col + j]
                 matrix[-1].append(ave_num(sum, a, b))
             col += a
@@ -379,6 +350,7 @@ def test3_1():
     Y = [[76, 149, 29], [225, 255, 0], [225, 255, 0]]
     print(subsampling(3, 3, Y, 2, 2))
     print(subsampling(3, 2, Y, 2, 2))
+    print(subsampling(3, 2, Y, 2, 1))
     print(subsampling(5, 5, Y, 2, 2))
 
 
@@ -391,20 +363,11 @@ def extrapolate(w, h, C, a, b):
            Y=[[176, 14], [240, 0]] /  extrapolate(4,4,Y,2,2)
            Y=[[176, 14], [240, 0]] /  extrapolate(5,5,Y,2,2)
            
-    Output: [[176, 176, 14], 
-             [176, 176, 14], 
-             [240, 240, 0]]
+    Output: [[176, 176, 14], [176, 176, 14], [240, 240, 0]]
     
-            [[176, 176, 14, 14], 
-             [176, 176, 14, 14], 
-             [240, 240, 0, 0], 
-             [240, 240, 0, 0]]
+            [[176, 176, 14, 14], [176, 176, 14, 14], [240, 240, 0, 0], [240, 240, 0, 0]]
              
-            [[176, 176, 14, 14, 0], 
-             [176, 176, 14, 14, 0], 
-             [240, 240, 0, 0, 0], 
-             [240, 240, 0, 0, 0], 
-             [0, 0, 0, 0, 0]]
+            [[176, 176, 14, 14, 0], [176, 176, 14, 14, 0], [240, 240, 0, 0, 0], [240, 240, 0, 0, 0], [0, 0, 0, 0, 0]]
     """
 
     # we firss create the matrix of zeros in the size w and h
@@ -441,3 +404,556 @@ def test3_2():
     print(extrapolate(3, 3, Y, 2, 2))
     print(extrapolate(4, 4, Y, 2, 2))
     print(extrapolate(5, 5, Y, 2, 2))
+
+
+################################################ Block splitting ################################################
+# Exercise 4_1
+def extend(C):
+    if len(C[0]) < 8:
+        for el in C:
+            while len(el) < 8:
+                el.append(el[-1])
+
+    if len(C) < 8:
+        while len(C) < 8:
+            C.append(C[-1])
+
+    return C
+
+
+def block_splitting(w, h, C):
+    """
+    Write a function block_splitting(w, h, C) that takes a channel C and that yield all the 8x8 subblocks of the channel, line by line, fro left to right. 
+    If the channel data does not represent an integer number of blocks, then you must inplement the aforementionned padding technique.
+    """
+    if w < 8 and h < 8:
+        mat1 = extend(C)
+        yield mat1
+
+    if w >= 8 and h < 8:
+        for i in range(w // 8 + 1):
+            mat1 = []
+            for j in range(h):
+                if i * 8 + 8 < w:
+                    mat1.append(C[j][i * 8:i * 8 + 8])
+                else:
+                    mat1.append(C[j][i * 8:])
+            mat1 = extend(mat1)
+            yield mat1
+
+    if w < 8 and h >= 8:
+        for i in range(h // 8 + 1):
+            mat1 = []
+            for j in range(w):
+                if i * 8 + 8 < h:
+                    mat1.append(C[i * 8:i * 8 + 8][j])
+                else:
+                    for k in range(h - i * 8):
+                        mat1.append(C[i * 8 + k])
+            mat1 = extend(mat1)
+            yield mat1
+
+    if w >= 8 and h >= 8:
+        for i in range(h // 8 + 1):
+            for j in range(w // 8 + 1):
+                mat1 = []
+                for k in range(8):
+                    if i * 8 + 8 < h:
+                        if j * 8 + 8 < w:
+                            mat1.append(C[i * 8 + k][j * 8:j * 8 + 8])
+                        else:
+                            mat1.append(C[i * 8 + k][j * 8:])
+                    else:
+                        for l in range(h - i * 8):
+                            if j * 8 + 8 < w:
+                                mat1.append(C[i * 8 + l][j * 8:j * 8 + 8])
+                            else:
+                                mat1.append(C[i * 8 + l][j * 8:])
+                mat1 = extend(mat1)
+                yield mat1
+
+
+C1 = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
+    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
+    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
+    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
+    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
+    [7, 8, 9, 10, 1, 2, 3, 4, 5, 6],
+    [8, 9, 10, 1, 2, 3, 4, 5, 6, 7],
+    [9, 10, 1, 2, 3, 4, 5, 6, 7, 8],
+]
+
+C2 = [
+    [1, 2, 3, 4, 5, 6],
+    [2, 3, 4, 5, 6, 7],
+    [3, 4, 5, 6, 7, 8],
+    [4, 5, 6, 7, 8, 9],
+    [5, 6, 7, 8, 9, 10],
+    [6, 7, 8, 9, 10, 1],
+    [7, 8, 9, 10, 1, 2],
+]
+
+C3 = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
+    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
+    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
+    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
+    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
+]
+
+C4 = [
+    [1, 2, 3, 4, 5, 6, 7],
+    [2, 3, 4, 5, 6, 7, 8],
+    [3, 4, 5, 6, 7, 8, 9],
+    [4, 5, 6, 7, 8, 9, 10],
+    [5, 6, 7, 8, 9, 10, 1],
+    [6, 7, 8, 9, 10, 1, 2],
+    [7, 8, 9, 10, 1, 2, 3],
+    [8, 9, 10, 1, 2, 3, 4],
+    [9, 10, 1, 2, 3, 4, 5],
+]
+
+
+def test4_1():
+    for el in block_splitting(10, 9, C1):
+        print(el)
+
+
+################################################ Discrete Cosine Transform (DCT) ################################################
+"""""" """""" """ The general case """ """""" """"""
+
+
+# Exercise 5_1
+def DCT(v):
+    """
+    Write a function DCT(v) that takes a vector v and that returns its DCT-II.
+    """
+    N = len(v)
+    C = [0] * N
+    for i in range(N):
+        for n in range(N):
+            if i == 0:
+                delta = 1 / math.sqrt(2)
+            else:
+                delta = 1
+            C[i] += delta * math.sqrt(2 / N) * v[n] * math.cos(
+                math.pi * (2 * n + 1) * i / (2 * N))
+    for i in range(N):
+        C[i] = round(C[i], 2)
+    return C
+
+
+def test5_1():
+    print(DCT([8, 16, 24, 32, 40, 48, 56, 64]))
+    # should return [101.82, -51.54, 0.00, -5.39, 0.00, -1.61, 0.00, -0.41]
+
+
+# Exercise 5_2
+def IDCT(v):
+    """
+    Write a function IDCT(v) that computes the inverse DCT-II of the vector v.
+    """
+    N = len(v)
+    # we first compute the matrix of coefficients
+    C_ij = []
+    for i in range(N):
+        value = 0
+        for j in range(N):
+            if j == 0:
+                delta = 1 / math.sqrt(2)
+            else:
+                delta = 1
+            value += delta * v[j] * math.sqrt(2 / N) * math.cos(
+                math.pi * (i + 0.5) * j / N)
+        C_ij.append(value)
+    return C_ij
+
+
+def test5_2():
+    v = [
+        float(random.randrange(-10**5, 10**5))
+        for _ in range(random.randrange(1, 128))
+    ]
+    v2 = IDCT(DCT(v))
+    assert (all(math.isclose(v[i], v2[i]) for i in range(len(v))))
+
+
+# Exercise 5_3
+"""We first define some operations on matrixes"""
+
+
+def matrix(n):
+    """In this function we compute the matrix of coefficients"""
+    mat = [0] * n
+    for i in range(n):
+        mat[i] = [0] * n
+
+    for i in range(n):
+        for j in range(n):
+            if i == 0:
+                delta = 1 / math.sqrt(2)
+            else:
+                delta = 1
+            mat[i][j] = delta * math.sqrt(2 / n) * math.cos(math.pi *
+                                                            (2 * j + 1) * i /
+                                                            (2 * n))
+
+    return mat
+
+
+def zero_matrix(m, n):
+    """In this function we create a zero matrix"""
+    mat = [0] * m
+    for i in range(m):
+        mat[i] = [0] * n
+
+    return mat
+
+
+def matrix_round(A, m, n, r):
+    """In this function we round the matrix"""
+    for i in range(m):
+        for j in range(n):
+            A[i][j] = round(A[i][j], r)
+    return A
+
+
+def matrix_mult(A, B):
+    """In this function we compute the multiplication of two matrixes"""
+    m = len(A)
+    n = len(A[0])
+    p = len(B[0])
+    C = zero_matrix(m, p)
+    for i in range(m):
+        for j in range(p):
+            for k in range(n):
+                C[i][j] += A[i][k] * B[k][j]
+
+    return C
+
+
+def matrix_transpose(A):
+    """In this function we compute the transpose of a matrix"""
+    m = len(A)
+    n = len(A[0])
+    C = zero_matrix(n, m)
+    for i in range(m):
+        for j in range(n):
+            C[j][i] = A[i][j]
+    return C
+
+
+def DCT2(m, n, A):
+    C_m = matrix(m)
+    C_n = matrix(n)
+
+    # we first compute the matrix C_m * A
+    C1 = zero_matrix(m, n)
+    C_n_tranpose = matrix_transpose(C_n)
+    C1 = matrix_mult(C_m, A)
+
+    # we then compute the matrix C1 * tranpose(C_n)
+    C2 = zero_matrix(m, n)
+    C2 = matrix_mult(C1, C_n_tranpose)
+
+    # we round the numbers in the matrix C2 to 3 decimal places
+
+    return C2
+
+
+A = [
+    [140, 144, 147, 140, 140, 155, 179, 175],
+    [144, 152, 140, 147, 140, 148, 167, 179],
+    [152, 155, 136, 167, 163, 162, 152, 172],
+    [168, 145, 156, 160, 152, 155, 136, 160],
+    [162, 148, 156, 148, 140, 136, 147, 162],
+    [147, 167, 140, 155, 155, 140, 136, 162],
+    [136, 156, 123, 167, 162, 144, 140, 147],
+    [148, 155, 136, 155, 152, 147, 147, 136],
+]
+
+
+def test5_3():
+    print(DCT2(8, 8, A))
+
+
+A_hat = [
+    [1210.000,  -17.997,   14.779,   -8.980,   23.250,   -9.233,  -13.969,  -18.937],
+    [  20.538,  -34.093,   26.330,   -9.039,  -10.933,   10.731,   13.772,    6.955],
+    [ -10.384,  -23.514,   -1.854,    6.040,  -18.075,    3.197,  -20.417,   -0.826],
+    [  -8.105,   -5.041,   14.332,  -14.613,   -8.218,   -2.732,   -3.085,    8.429],
+    [  -3.250,    9.501,    7.885,    1.317,  -11.000,   17.904,   18.382,   15.241],
+    [   3.856,   -2.215,  -18.167,    8.500,    8.269,   -3.608,    0.869,   -6.863],
+    [   8.901,    0.633,   -2.917,    3.641,   -1.172,   -7.422,   -1.146,   -1.925],
+    [   0.049,   -7.813,   -2.425,    1.590,    1.199,    4.247,   -6.417,    0.315],
+]
+
+
+
+# Exercise 5_4
+def IDCT2(m, n, A):
+    """In this function we compute the inverse of A, which we have A_hat and we compute the inverse of A_hat"""
+    C_m = matrix(m)
+    C_n = matrix(n)
+    C1 = zero_matrix(m, n)
+    C1 = matrix_mult(matrix_transpose(C_m), A)
+
+    C2 = zero_matrix(m, n)
+    C2 = matrix_mult(C1, C_n)
+    C2 = matrix_round(C2, m, n, 3)
+
+    return C2
+
+
+"""
+print(IDCT2(8, 8, DCT2(8, 8, A)))
+"""
+
+
+def test5_4():
+    m = random.randrange(1, 5)
+    n = random.randrange(1, 5)
+    A = [[float(random.randrange(-10**5, 10**5)) for _ in range(n)]
+         for _ in range(m)]
+    A2 = IDCT2(m, n, DCT2(m, n, A))
+    assert (all(
+        math.isclose(A[i][j], A2[i][j]) for i in range(m) for j in range(n)))
+
+
+"""""" """""" """ The 8x8 DCT-II Transform & Chen's Algorithm """ """""" """"""
+
+
+# Exercise 5_5
+def redalpha(i):
+    """
+    In this function we transfer i-th cosine with the parity of cosine function:
+    cos(x+pi) = -cos(x)
+    cos(x+2pi) = cos(x)
+    """
+    a = i // 32
+    i = i - 32 * a
+
+    if i <= 8:
+        s = 1
+        k = i
+
+    if i > 8 and i <= 16:
+        s = -1
+        k = 16 - i
+
+    if i > 16 and i <= 24:
+        s = -1
+        k = i - 16
+
+    if i > 24 and i <= 32:
+        s = 1
+        k = 32 - i
+
+    return (s, k)
+
+
+def test5_5():
+    for i in range(56):
+        print(redalpha(i))
+
+
+# Exercise 5_6
+def ncoeff8(i, j):
+    if i == 0:
+        s, k = 1, 4
+    else:
+        s, k = redalpha(i * (2 * j + 1))
+    return (s, k)
+
+
+def test5_6():
+    M8 = [[ncoeff8(i, j) for j in range(8)] for i in range(8)]
+
+    def M8_to_str(M8):
+
+        def for1(s, i):
+            return f"{'+' if s >= 0 else '-'}{i:d}"
+
+        return "\n".join(" ".join(for1(s, i) for (s, i) in row) for row in M8)
+
+    print(M8_to_str(M8))
+
+
+"""
++4 +4 +4 +4 +4 +4 +4 +4
++1 +3 +5 +7 -7 -5 -3 -1
++2 +6 -6 -2 -2 -6 +6 +2
++3 -7 -1 -5 +5 +1 +7 -3
++4 -4 -4 +4 +4 -4 -4 +4
++5 -1 +7 +3 -3 -7 +1 -5
++6 -2 +2 -6 -6 +2 -2 +6
++7 -5 +3 -1 +1 -3 +5 -7
+"""
+
+
+# Exercise 5_7
+def DCT_Chen(A):
+    C1 = zero_matrix(8, 8)
+    count = 0
+    C_8 = matrix(8)
+
+    for i in range(8):
+        if i == 0:
+            for j in range(8):
+                column = 0
+                for sub_i in range(8):
+                    column += A[sub_i][j]
+                C1[i][j] = column * C_8[i][0]
+                count += 1
+
+        if i == 1:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] - A[7][j]) + C_8[i][1] * (
+                    A[1][j] - A[6][j]) + C_8[i][2] * (
+                        A[2][j] - A[5][j]) + C_8[i][3] * (A[3][j] - A[4][j])
+                count += 4
+
+        if i == 2:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] + A[7][j] - A[3][j] - A[4][j]
+                                        ) + C_8[i][1] * (A[1][j] + A[6][j] -
+                                                         A[2][j] - A[5][j])
+                count += 2
+
+        if i == 3:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] - A[7][j]) + C_8[i][6] * (
+                    A[6][j] - A[1][j]) + C_8[i][5] * (
+                        A[5][j] - A[2][j]) + C_8[i][4] * (A[4][j] - A[3][j])
+                count += 4
+
+        if i == 4:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] + A[3][j] + A[4][j] + A[7][j] -
+                                        A[2][j] - A[1][j] - A[5][j] - A[6][j])
+                count += 1
+
+        if i == 5:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] - A[7][j]) + C_8[i][6] * (
+                    -A[1][j] + A[6][j]) + C_8[i][2] * (
+                        A[2][j] - A[5][j]) + C_8[i][3] * (A[3][j] - A[4][j])
+                count += 4
+
+        if i == 6:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] + A[7][j] - A[3][j] - A[4][j]
+                                        ) + C_8[i][2] * (A[2][j] + A[5][j] -
+                                                         A[1][j] - A[6][j])
+                count += 2
+
+        if i == 7:
+            for j in range(8):
+                C1[i][j] = C_8[i][0] * (A[0][j] - A[7][j]) + C_8[i][6] * (
+                    -A[1][j] + A[6][j]) + C_8[i][2] * (
+                        A[2][j] - A[5][j]) + C_8[i][4] * (-A[3][j] + A[4][j])
+                count += 4
+
+    C2 = zero_matrix(8, 8)
+    C_8T = matrix_transpose(C_8)
+
+    # Then we use the same method to compute the second part of DCT
+
+    for i in range(8):
+        if i == 0:  # check
+            for j in range(8):
+                column = 0
+                for sub_i in range(8):
+                    column += C1[j][sub_i]
+                C2[j][i] = column * C_8T[0][0]
+                count += 1
+
+        if i == 1:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (C1[j][0] - C1[j][7]) + C_8T[1][i] * (
+                    C1[j][1] - C1[j][6]) + C_8T[2][i] * (
+                        C1[j][2] - C1[j][5]) + C_8T[3][i] * (C1[j][3] -
+                                                             C1[j][4])
+                count += 4
+
+        if i == 2:
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (
+                    C1[j][0] + C1[j][7] - C1[j][3] - C1[j][4]) + C_8T[1][i] * (
+                        C1[j][1] + C1[j][6] - C1[j][2] - C1[j][5])
+                count += 2
+
+        if i == 3:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (C1[j][0] - C1[j][7]) + C_8T[6][i] * (
+                    C1[j][6] - C1[j][1]) + C_8T[5][i] * (
+                        C1[j][5] - C1[j][2]) + C_8T[4][i] * (C1[j][4] -
+                                                             C1[j][3])
+                count += 4
+
+        if i == 4:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (C1[j][0] + C1[j][3] + C1[j][4] +
+                                         C1[j][7] - C1[j][2] - C1[j][1] -
+                                         C1[j][5] - C1[j][6])
+                count += 1
+
+        if i == 5:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (C1[j][0] - C1[j][7]) + C_8T[6][i] * (
+                    -C1[j][1] + C1[j][6]) + C_8T[2][i] * (
+                        C1[j][2] - C1[j][5]) + C_8T[3][i] * (C1[j][3] -
+                                                             C1[j][4])
+                count += 4
+
+        if i == 6:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (
+                    C1[j][0] + C1[j][7] - C1[j][3] - C1[j][4]) + C_8T[2][i] * (
+                        C1[j][2] + C1[j][5] - C1[j][1] - C1[j][6])
+                count += 2
+
+        if i == 7:  # checked
+            for j in range(8):
+                C2[j][i] = C_8T[0][i] * (C1[j][0] - C1[j][7]) + C_8T[6][i] * (
+                    -C1[j][1] + C1[j][6]) + C_8T[2][i] * (
+                        C1[j][2] - C1[j][5]) + C_8T[4][i] * (-C1[j][3] +
+                                                             C1[j][4])
+                count += 4
+
+    C2 = matrix_round(C2, 8, 8, 3)
+
+    return C2, count
+
+
+def test5_7():
+    print(DCT_Chen(A))
+
+
+"""""" """""" """ The inverse 8x8 Transform """ """""" """"""
+
+
+# Exercise 5_8
+def IDCT_Chen(A):
+    pass
+
+
+################################################ Quantization ################################################
+
+
+# Exercise 6_1
+def quantization(A, Q):
+    pass
+
+
+# Exercise 6_2
+def quantizationI(A, Q):
+    pass
+
+
+# Exercise 6_3
+def Qmatrix(isY, phi):
+    pass
