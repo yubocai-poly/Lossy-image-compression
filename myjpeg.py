@@ -9,7 +9,6 @@ Final Project - Lossy image compression
 
 import math
 import random
-import numpy as np
 
 
 # Exercise 1_1
@@ -40,12 +39,6 @@ def ppm_tokenize(stream):
     for element in output:
         yield element
     # print all the elements in the list
-
-
-def test1_1():
-    with open('test.ppm') as stream:
-        for token in ppm_tokenize(stream):
-            print(token)
 
 
 # Exercise 1_2
@@ -93,14 +86,6 @@ def ppm_load(stream):
     return (weight, height, new_matrix)
 
 
-def test1_2():
-    with open('test.ppm') as stream:
-        w, h, img = ppm_load(stream)
-    print(w)
-    print(h)
-    print(img)
-
-
 # Exercise 1_3
 def ppm_save(w, h, img, outfile):
     """ 
@@ -116,19 +101,11 @@ def ppm_save(w, h, img, outfile):
             outfile.write('\n')
 
 
-def test1_3():
-    with open('test.ppm') as stream:
-        w, h, img = ppm_load(stream)
-    with open('output_test.ppm', 'w') as output:
-        ppm_save(w, h, img, output)
-
-
 ################################################ RGB to YCbCr conversion & channel separation ################################################
 
 
 # Exercise 2_1
 def RGB2YCbCr(r, g, b):
-    """.DS_Store"""
     """write a function RGB2YCbCr(r, g, b) that takes a pixel's color in the RGB color space and that converts it in the YCbCr color space, returning the 3-element tuple (Y, Cb, Cr)."""
     """ 
     Input: (R, G, B)
@@ -138,13 +115,13 @@ def RGB2YCbCr(r, g, b):
     cb = round(128 - 0.168736 * r - 0.331264 * g + 0.5 * b)
     cr = round(128 + 0.5 * r - 0.418688 * g - 0.081312 * b)
     # we testify whether the number is above 255 or below 0 for each
-    if y > 255:
+    if y > 255:  # we round the number to 255 if it is above 255
         y = 255
     if y < 0:
         y = 0
     if cb > 255:
         cb = 255
-    if cb < 0:
+    if cb < 0:  # we round the number to 0 if it is below 0
         cb = 0
     if cr > 255:
         cr = 255
@@ -153,25 +130,19 @@ def RGB2YCbCr(r, g, b):
     return (y, cb, cr)
 
 
-# test
-def test2_1():
-    a = RGB2YCbCr(255, 0, 0)
-    print(a)
-
-
-# Exercise 2_2
+# Exercise 2_2 - check
 def YCbCr2RGB(Y, Cb, Cr):
-    """write a function YCbCr2RGB(Y, Cb, Cr) that takes a pixel's color in the YCbCr color space and that converts it in the RGB color space, returning the 3-element tuple (r, g, b)."""
-    """ 
+    """
+    write a function YCbCr2RGB(Y, Cb, Cr) that takes a pixel's color in the YCbCr color space and that converts it in the RGB color space, returning the 3-element tuple (r, g, b).
     Input: (Y, Cb, Cr)
     Output: (R, G, B)
     """
     r = round(Y + 1.402 * (Cr - 128))
     g = round(Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128))
     b = round(Y + 1.772 * (Cb - 128))
-    if r > 255:
+    if r > 255:  # we round the number to 255 if it is above 255
         r = 255
-    if r < 0:
+    if r < 0:  # we round the number to 0 if it is below 0
         r = 0
     if g > 255:
         g = 255
@@ -182,12 +153,6 @@ def YCbCr2RGB(Y, Cb, Cr):
     if b < 0:
         b = 0
     return (r, g, b)
-
-
-# test
-def test2_2():
-    a = YCbCr2RGB(255, 0, 0)
-    print(a)
 
 
 # Exercise 2_3
@@ -222,20 +187,12 @@ def img_RGB2YCbCr(img):
     return (Y, Cb, Cr)
 
 
-def test2_3():
-    with open('test.ppm') as stream:
-        w, h, img = ppm_load(stream)
-    Y, Cb, Cr = img_RGB2YCbCr(img)
-    print(img_RGB2YCbCr(img))
-
-
 # Exercise 2_4
 def img_YCbCr2RGB(Y, Cb, Cr):
     """ 
     Input: ([[76, 150, 29], [226, 255, 0]], 
             [[85, 44, 255], [0, 128, 128]], 
             [[255, 21, 107], [149, 128, 128]])
-             
     Output: [[(254, 0, 0), (0, 255, 1), (0, 0, 254)], [(255, 255, 0), (255, 255, 255), (0, 0, 0)]]
     """
     # inverse function of img_RGB2YCbCr
@@ -252,19 +209,6 @@ def img_YCbCr2RGB(Y, Cb, Cr):
             img[i][j] = (r, g, b)
 
     return img
-
-
-def test2_4():
-    with open('test.ppm') as stream:
-        w, h, img = ppm_load(stream)
-    print(img)
-    Y, Cb, Cr = img_RGB2YCbCr(img)
-    print(img_YCbCr2RGB(Y, Cb, Cr))
-
-    if img_RGB2YCbCr(img) == img_YCbCr2RGB(Y, Cb, Cr):
-        print('True')
-    else:
-        print('Must be the round error')
 
 
 ################################################ Subsampling ################################################
@@ -342,34 +286,16 @@ def subsampling(w, h, C, a, b):
     return matrix
 
 
-def test3_1():
-    with open('test.ppm') as stream:
-        w, h, img = ppm_load(stream)
-    Y, Cb, Cr = img_RGB2YCbCr(img)
-    print(Y)
-    Y = [[76, 149, 29], [225, 255, 0], [225, 255, 0]]
-    print(subsampling(3, 3, Y, 2, 2))
-    print(subsampling(3, 2, Y, 2, 2))
-    print(subsampling(3, 2, Y, 2, 1))
-    print(subsampling(5, 5, Y, 2, 2))
-
-
 # Exercise 3_2
-
-
 def extrapolate(w, h, C, a, b):
     """
     Input: Y=[[176, 14], [240, 0]] /  extrapolate(3,3,Y,2,2)
            Y=[[176, 14], [240, 0]] /  extrapolate(4,4,Y,2,2)
            Y=[[176, 14], [240, 0]] /  extrapolate(5,5,Y,2,2)
-           
     Output: [[176, 176, 14], [176, 176, 14], [240, 240, 0]]
-    
             [[176, 176, 14, 14], [176, 176, 14, 14], [240, 240, 0, 0], [240, 240, 0, 0]]
-             
             [[176, 176, 14, 14, 0], [176, 176, 14, 14, 0], [240, 240, 0, 0, 0], [240, 240, 0, 0, 0], [0, 0, 0, 0, 0]]
     """
-
     # we firss create the matrix of zeros in the size w and h
     Mat = [0] * h
     for i in range(h):
@@ -398,128 +324,23 @@ def extrapolate(w, h, C, a, b):
     return Mat
 
 
-def test3_2():
-    Y = [[176, 14], [240, 0]]
-    print(extrapolate(3, 2, Y, 2, 2))
-    print(extrapolate(3, 3, Y, 2, 2))
-    print(extrapolate(4, 4, Y, 2, 2))
-    print(extrapolate(5, 5, Y, 2, 2))
-
-
 ################################################ Block splitting ################################################
 # Exercise 4_1
-def extend(C):
-    if len(C[0]) < 8:
-        for el in C:
-            while len(el) < 8:
-                el.append(el[-1])
-
-    if len(C) < 8:
-        while len(C) < 8:
-            C.append(C[-1])
-
-    return C
-
-
 def block_splitting(w, h, C):
     """
     Write a function block_splitting(w, h, C) that takes a channel C and that yield all the 8x8 subblocks of the channel, line by line, fro left to right. 
     If the channel data does not represent an integer number of blocks, then you must inplement the aforementionned padding technique.
     """
-    if w < 8 and h < 8:
-        mat1 = extend(C)
-        yield mat1
+    for i in range(0, h, 8):
+        for j in range(0, w, 8):
+            C_block = []
+            for k in range(i, i + 8):
+                C_block.append([])
+                for l in range(j, j + 8):
+                    index_i, index_j = min(h - 1, k), min(l, w - 1)
+                    C_block[-1].append(C[index_i][index_j])
 
-    if w >= 8 and h < 8:
-        for i in range(w // 8 + 1):
-            mat1 = []
-            for j in range(h):
-                if i * 8 + 8 < w:
-                    mat1.append(C[j][i * 8:i * 8 + 8])
-                else:
-                    mat1.append(C[j][i * 8:])
-            mat1 = extend(mat1)
-            yield mat1
-
-    if w < 8 and h >= 8:
-        for i in range(h // 8 + 1):
-            mat1 = []
-            for j in range(w):
-                if i * 8 + 8 < h:
-                    mat1.append(C[i * 8:i * 8 + 8][j])
-                else:
-                    for k in range(h - i * 8):
-                        mat1.append(C[i * 8 + k])
-            mat1 = extend(mat1)
-            yield mat1
-
-    if w >= 8 and h >= 8:
-        for i in range(h // 8 + 1):
-            for j in range(w // 8 + 1):
-                mat1 = []
-                for k in range(8):
-                    if i * 8 + 8 < h:
-                        if j * 8 + 8 < w:
-                            mat1.append(C[i * 8 + k][j * 8:j * 8 + 8])
-                        else:
-                            mat1.append(C[i * 8 + k][j * 8:])
-                    else:
-                        for l in range(h - i * 8):
-                            if j * 8 + 8 < w:
-                                mat1.append(C[i * 8 + l][j * 8:j * 8 + 8])
-                            else:
-                                mat1.append(C[i * 8 + l][j * 8:])
-                mat1 = extend(mat1)
-                yield mat1
-
-
-C1 = [
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
-    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
-    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
-    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
-    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
-    [7, 8, 9, 10, 1, 2, 3, 4, 5, 6],
-    [8, 9, 10, 1, 2, 3, 4, 5, 6, 7],
-    [9, 10, 1, 2, 3, 4, 5, 6, 7, 8],
-]
-
-C2 = [
-    [1, 2, 3, 4, 5, 6],
-    [2, 3, 4, 5, 6, 7],
-    [3, 4, 5, 6, 7, 8],
-    [4, 5, 6, 7, 8, 9],
-    [5, 6, 7, 8, 9, 10],
-    [6, 7, 8, 9, 10, 1],
-    [7, 8, 9, 10, 1, 2],
-]
-
-C3 = [
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
-    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
-    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
-    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
-    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
-]
-
-C4 = [
-    [1, 2, 3, 4, 5, 6, 7],
-    [2, 3, 4, 5, 6, 7, 8],
-    [3, 4, 5, 6, 7, 8, 9],
-    [4, 5, 6, 7, 8, 9, 10],
-    [5, 6, 7, 8, 9, 10, 1],
-    [6, 7, 8, 9, 10, 1, 2],
-    [7, 8, 9, 10, 1, 2, 3],
-    [8, 9, 10, 1, 2, 3, 4],
-    [9, 10, 1, 2, 3, 4, 5],
-]
-
-
-def test4_1():
-    for el in block_splitting(10, 9, C1):
-        print(el)
+            yield C_block
 
 
 ################################################ Discrete Cosine Transform (DCT) ################################################
@@ -546,11 +367,6 @@ def DCT(v):
     return C
 
 
-def test5_1():
-    print(DCT([8, 16, 24, 32, 40, 48, 56, 64]))
-    # should return [101.82, -51.54, 0.00, -5.39, 0.00, -1.61, 0.00, -0.41]
-
-
 # Exercise 5_2
 def IDCT(v):
     """
@@ -570,15 +386,6 @@ def IDCT(v):
                 math.pi * (i + 0.5) * j / N)
         C_ij.append(value)
     return C_ij
-
-
-def test5_2():
-    v = [
-        float(random.randrange(-10**5, 10**5))
-        for _ in range(random.randrange(1, 128))
-    ]
-    v2 = IDCT(DCT(v))
-    assert (all(math.isclose(v[i], v2[i]) for i in range(len(v))))
 
 
 # Exercise 5_3
@@ -664,35 +471,6 @@ def DCT2(m, n, A):
     return C2
 
 
-A = [
-    [140, 144, 147, 140, 140, 155, 179, 175],
-    [144, 152, 140, 147, 140, 148, 167, 179],
-    [152, 155, 136, 167, 163, 162, 152, 172],
-    [168, 145, 156, 160, 152, 155, 136, 160],
-    [162, 148, 156, 148, 140, 136, 147, 162],
-    [147, 167, 140, 155, 155, 140, 136, 162],
-    [136, 156, 123, 167, 162, 144, 140, 147],
-    [148, 155, 136, 155, 152, 147, 147, 136],
-]
-
-
-def test5_3():
-    print(DCT2(8, 8, A))
-
-
-A_hat = [
-    [1210.000,  -17.997,   14.779,   -8.980,   23.250,   -9.233,  -13.969,  -18.937],
-    [  20.538,  -34.093,   26.330,   -9.039,  -10.933,   10.731,   13.772,    6.955],
-    [ -10.384,  -23.514,   -1.854,    6.040,  -18.075,    3.197,  -20.417,   -0.826],
-    [  -8.105,   -5.041,   14.332,  -14.613,   -8.218,   -2.732,   -3.085,    8.429],
-    [  -3.250,    9.501,    7.885,    1.317,  -11.000,   17.904,   18.382,   15.241],
-    [   3.856,   -2.215,  -18.167,    8.500,    8.269,   -3.608,    0.869,   -6.863],
-    [   8.901,    0.633,   -2.917,    3.641,   -1.172,   -7.422,   -1.146,   -1.925],
-    [   0.049,   -7.813,   -2.425,    1.590,    1.199,    4.247,   -6.417,    0.315],
-]
-
-
-
 # Exercise 5_4
 def IDCT2(m, n, A):
     """In this function we compute the inverse of A, which we have A_hat and we compute the inverse of A_hat"""
@@ -706,21 +484,6 @@ def IDCT2(m, n, A):
     C2 = matrix_round(C2, m, n, 3)
 
     return C2
-
-
-"""
-print(IDCT2(8, 8, DCT2(8, 8, A)))
-"""
-
-
-def test5_4():
-    m = random.randrange(1, 5)
-    n = random.randrange(1, 5)
-    A = [[float(random.randrange(-10**5, 10**5)) for _ in range(n)]
-         for _ in range(m)]
-    A2 = IDCT2(m, n, DCT2(m, n, A))
-    assert (all(
-        math.isclose(A[i][j], A2[i][j]) for i in range(m) for j in range(n)))
 
 
 """""" """""" """ The 8x8 DCT-II Transform & Chen's Algorithm """ """""" """"""
@@ -755,11 +518,6 @@ def redalpha(i):
     return (s, k)
 
 
-def test5_5():
-    for i in range(56):
-        print(redalpha(i))
-
-
 # Exercise 5_6
 def ncoeff8(i, j):
     if i == 0:
@@ -767,31 +525,6 @@ def ncoeff8(i, j):
     else:
         s, k = redalpha(i * (2 * j + 1))
     return (s, k)
-
-
-def test5_6():
-    M8 = [[ncoeff8(i, j) for j in range(8)] for i in range(8)]
-
-    def M8_to_str(M8):
-
-        def for1(s, i):
-            return f"{'+' if s >= 0 else '-'}{i:d}"
-
-        return "\n".join(" ".join(for1(s, i) for (s, i) in row) for row in M8)
-
-    print(M8_to_str(M8))
-
-
-"""
-+4 +4 +4 +4 +4 +4 +4 +4
-+1 +3 +5 +7 -7 -5 -3 -1
-+2 +6 -6 -2 -2 -6 +6 +2
-+3 -7 -1 -5 +5 +1 +7 -3
-+4 -4 -4 +4 +4 -4 -4 +4
-+5 -1 +7 +3 -3 -7 +1 -5
-+6 -2 +2 -6 -6 +2 -2 +6
-+7 -5 +3 -1 +1 -3 +5 -7
-"""
 
 
 # Exercise 5_7
@@ -926,34 +659,520 @@ def DCT_Chen(A):
 
     C2 = matrix_round(C2, 8, 8, 3)
 
-    return C2, count
-
-
-def test5_7():
-    print(DCT_Chen(A))
+    return C2
 
 
 """""" """""" """ The inverse 8x8 Transform """ """""" """"""
 
 
 # Exercise 5_8
+def matrix_change():
+    C1 = matrix(8)
+    C = zero_matrix(8, 8)
+    for i in range(8):
+        if i == 0:
+            for j in range(8):
+                C[i][j] = C1[0][j % 4]
+
+        if i == 1:
+            for j in range(8):
+                C[i][j] = C1[2][j % 4]
+
+        if i == 2:
+            for j in range(8):
+                C[i][j] = C1[4][j % 4]
+
+        if i == 3:
+            for j in range(8):
+                C[i][j] = C1[6][j % 4]
+
+        if i == 4:
+            for j in range(8):
+                if j <= 3:
+                    C[i][j] = C1[1][j]
+                else:
+                    C[i][j] = -C1[1][j - 4]
+
+        if i == 5:
+            for j in range(8):
+                if j <= 3:
+                    C[i][j] = C1[3][j]
+                else:
+                    C[i][j] = -C1[3][j - 4]
+
+        if i == 6:
+            for j in range(8):
+                if j <= 3:
+                    C[i][j] = C1[5][j]
+                else:
+                    C[i][j] = -C1[5][j - 4]
+
+        if i == 7:
+            for j in range(8):
+                if j <= 3:
+                    C[i][j] = C1[7][j]
+                else:
+                    C[i][j] = -C1[7][j - 4]
+
+    return C
+
+
+def IDCT_Chen_aux(A):
+    C = matrix_change()
+    mat = []
+    for i in range(8):
+        for j in range(8):
+            if j == 0:
+                num = C[0][0] * (
+                    A[0] +
+                    A[4]) + C[4][0] * A[1] + C[1][0] * A[2] + C[5][0] * A[
+                        3] + C[6][0] * A[5] + C[3][0] * A[6] + C[7][0] * A[7]
+                mat.append(num)
+
+            if j == 1:
+                num = C[0][0] * (
+                    A[0] -
+                    A[4]) + C[5][0] * A[1] + C[3][0] * A[2] - C[7][0] * A[
+                        3] - C[4][0] * A[5] - C[1][0] * A[6] - C[6][0] * A[7]
+                mat.append(num)
+
+            if j == 2:
+                num = C[0][0] * (
+                    A[0] -
+                    A[4]) + C[6][0] * A[1] - C[3][0] * A[2] - C[4][0] * A[
+                        3] + C[7][0] * A[5] + C[1][0] * A[6] + C[5][0] * A[7]
+                mat.append(num)
+
+            if j == 3:
+                num = C[0][0] * (
+                    A[0] +
+                    A[4]) + C[7][0] * A[1] - C[1][0] * A[2] - C[6][0] * A[
+                        3] + C[5][0] * A[5] - C[3][0] * A[6] - C[4][0] * A[7]
+                mat.append(num)
+
+            if j == 4:
+                num = C[0][0] * (
+                    A[0] +
+                    A[4]) - C[7][0] * A[1] - C[1][0] * A[2] + C[6][0] * A[
+                        3] - C[5][0] * A[5] - C[3][0] * A[6] + C[4][0] * A[7]
+                mat.append(num)
+
+            if j == 5:
+                num = C[0][0] * (
+                    A[0] -
+                    A[4]) - C[6][0] * A[1] - C[3][0] * A[2] + C[4][0] * A[
+                        3] - C[7][0] * A[5] + C[1][0] * A[6] - C[5][0] * A[7]
+                mat.append(num)
+
+            if j == 6:
+                num = C[0][0] * (
+                    A[0] -
+                    A[4]) - C[5][0] * A[1] + C[3][0] * A[2] + C[7][0] * A[
+                        3] + C[4][0] * A[5] - C[1][0] * A[6] + C[6][0] * A[7]
+                mat.append(num)
+
+            if j == 7:
+                num = C[0][0] * (
+                    A[0] +
+                    A[4]) - C[4][0] * A[1] + C[1][0] * A[2] - C[5][0] * A[
+                        3] - C[6][0] * A[5] + C[3][0] * A[6] - C[7][0] * A[7]
+                mat.append(num)
+    return mat
+
+
 def IDCT_Chen(A):
-    pass
+    aux = []
+    for el in A:
+        aux.append(IDCT_Chen_aux(el))
+    mat = []
+    for i in range(8):
+        mat.append([])
+    for j in range(8):
+        vec = [el[j] for el in aux]
+        vec1 = IDCT_Chen_aux(vec)
+        for k in range(8):
+            mat[k].append(vec1[k])
+
+    for i in range(8):
+        for j in range(8):
+            mat[i][j] = round(mat[i][j], 0)
+
+    return mat
 
 
 ################################################ Quantization ################################################
 
 
-# Exercise 6_1
+# Exercise 6_1 - check
 def quantization(A, Q):
-    pass
+    # The quantization of A by Q
+    Mat = zero_matrix(8, 8)
+    for i in range(8):
+        for j in range(8):
+            Mat[i][j] = round(A[i][j] / Q[i][j])
+
+    return Mat
 
 
-# Exercise 6_2
+# Exercise 6_2 - check
 def quantizationI(A, Q):
-    pass
+    # The inverse quantization of A by Q
+    Mat = zero_matrix(8, 8)
+    for i in range(8):
+        for j in range(8):
+            Mat[i][j] = round(A[i][j] * Q[i][j])
+
+    return Mat
 
 
 # Exercise 6_3
+def quant_Sipser(M):
+    if M == True:
+        quant_matrix = [
+            [16, 11, 10, 16, 24, 40, 51, 61],
+            [12, 12, 14, 19, 26, 58, 60, 55],
+            [14, 13, 16, 24, 40, 57, 69, 56],
+            [14, 17, 22, 29, 51, 87, 80, 62],
+            [18, 22, 37, 56, 68, 109, 103, 77],
+            [24, 35, 55, 64, 81, 104, 113, 92],
+            [49, 64, 78, 87, 103, 121, 120, 101],
+            [72, 92, 95, 98, 112, 100, 103, 99],
+        ]
+
+    if M == False:
+        quant_matrix = [
+            [17, 18, 24, 47, 99, 99, 99, 99],
+            [18, 21, 26, 66, 99, 99, 99, 99],
+            [24, 26, 56, 99, 99, 99, 99, 99],
+            [47, 66, 99, 99, 99, 99, 99, 99],
+            [99, 99, 99, 99, 99, 99, 99, 99],
+            [99, 99, 99, 99, 99, 99, 99, 99],
+            [99, 99, 99, 99, 99, 99, 99, 99],
+            [99, 99, 99, 99, 99, 99, 99, 99],
+        ]
+
+    return quant_matrix
+
+
 def Qmatrix(isY, phi):
-    pass
+    Mat = quant_Sipser(M=isY)
+    Q = zero_matrix(8, 8)
+    if phi >= 50:
+        S = 200 - 2 * phi
+    else:
+        S = round(5000 / phi)
+    for i in range(8):
+        for j in range(8):
+            Q[i][j] = math.ceil((50 + S * Mat[i][j]) / 100)
+    return Q
+
+
+################################################ Zig-Zag walk & RLE Encoding ################################################
+"""""" """""" """ Zig-Zag walk """ """""" """"""
+
+
+# Exercise 7_1 - check
+def zigzag(A):
+    lis = []
+    i, j = 0, 0
+    lis.append(A[i][j])
+    while (i <= 7 and j <= 7):
+
+        if j % 2 == 0 and i == 0:
+            j += 1
+            lis.append(A[i][j])
+            for m in range(1, j + 1):
+                j, i = j - 1, i + 1
+                lis.append(A[i][j])
+
+        if i % 2 == 1 and j == 0 and i < 7:
+            i += 1
+            lis.append(A[i][j])
+            for m in range(1, i + 1):
+                j, i = j + 1, i - 1
+                lis.append(A[i][j])
+
+        if i == 7 and j % 2 == 0:
+            j += 1
+            lis.append(A[i][j])
+            for m in range(7 - j):
+                j, i = j + 1, i - 1
+                lis.append(A[i][j])
+
+        if j == 7 and i % 2 == 1:
+            if j == 7 and i == 7:
+                break
+            i += 1
+            lis.append(A[i][j])
+            for m in range(7 - i):
+                j, i = j - 1, i + 1
+                lis.append(A[i][j])
+
+    for el in lis:
+        yield el
+
+
+# Exercise 7_2 - check
+def rle0(g):
+    pre = 0
+    for el in g:
+        if el == 0:
+            pre += 1
+        else:
+            yield ((pre, el))
+            pre = 0
+
+
+################################################ The test file ################################################
+"""
+Yubo Cai
+CSE102 - Advanced Programming
+Final Project - Lossy image compression test file
+2022.05.16 - 2022.06.20
+"""
+
+
+# test1_1 - check
+def test1_1():
+    with open('test.ppm') as stream:
+        for token in ppm_tokenize(stream):
+            print(token)
+
+
+# test1_2 - check
+def test1_2():
+    with open('test.ppm') as stream:
+        w, h, img = ppm_load(stream)
+    print(w)
+    print(h)
+    print(img)
+
+
+# test1_3 - check
+def test1_3():
+    with open('test.ppm') as stream:
+        w, h, img = ppm_load(stream)
+    with open('output_test.ppm', 'w') as output:
+        ppm_save(w, h, img, output)
+
+
+# test2_1 - check
+def test2_1():
+    a = RGB2YCbCr(255, 0, 0)
+    print(a)
+
+
+# test2_2 - check
+def test2_2():
+    a = YCbCr2RGB(255, 0, 0)
+    print(a)
+
+
+# test2_3 - check
+def test2_3():
+    with open('test.ppm') as stream:
+        w, h, img = ppm_load(stream)
+    Y, Cb, Cr = img_RGB2YCbCr(img)
+    print(img_RGB2YCbCr(img))
+
+
+# test2_4  - check
+def test2_4():
+    with open('test.ppm') as stream:
+        w, h, img = ppm_load(stream)
+    print(img)
+    Y, Cb, Cr = img_RGB2YCbCr(img)
+    print(img_YCbCr2RGB(Y, Cb, Cr))
+
+    if img_RGB2YCbCr(img) == img_YCbCr2RGB(Y, Cb, Cr):
+        print('True')
+    else:
+        print('Must be the round error')
+
+
+# test3_1
+def test3_1():
+    with open('test.ppm') as stream:
+        w, h, img = ppm_load(stream)
+    Y, Cb, Cr = img_RGB2YCbCr(img)
+    print(Y)
+    Y = [[76, 149, 29], [225, 255, 0], [225, 255, 0]]
+    print(subsampling(3, 3, Y, 2, 2))
+    print(subsampling(3, 2, Y, 2, 2))
+    print(subsampling(3, 2, Y, 2, 1))
+    print(subsampling(5, 5, Y, 2, 2))
+
+
+# test3_2
+def test3_2():
+    Y = [[176, 14], [240, 0]]
+    print(extrapolate(3, 2, Y, 2, 2))
+    print(extrapolate(3, 3, Y, 2, 2))
+    print(extrapolate(4, 4, Y, 2, 2))
+    print(extrapolate(5, 5, Y, 2, 2))
+
+
+# test4_1 - check
+C1 = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
+    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
+    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
+    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
+    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
+    [7, 8, 9, 10, 1, 2, 3, 4, 5, 6],
+    [8, 9, 10, 1, 2, 3, 4, 5, 6, 7],
+    [9, 10, 1, 2, 3, 4, 5, 6, 7, 8],
+]
+
+C2 = [
+    [1, 2, 3, 4, 5, 6],
+    [2, 3, 4, 5, 6, 7],
+    [3, 4, 5, 6, 7, 8],
+    [4, 5, 6, 7, 8, 9],
+    [5, 6, 7, 8, 9, 10],
+    [6, 7, 8, 9, 10, 1],
+    [7, 8, 9, 10, 1, 2],
+]
+
+C3 = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [2, 3, 4, 5, 6, 7, 8, 9, 10, 1],
+    [3, 4, 5, 6, 7, 8, 9, 10, 1, 2],
+    [4, 5, 6, 7, 8, 9, 10, 1, 2, 3],
+    [5, 6, 7, 8, 9, 10, 1, 2, 3, 4],
+    [6, 7, 8, 9, 10, 1, 2, 3, 4, 5],
+]
+
+C4 = [
+    [1, 2, 3, 4, 5, 6, 7],
+    [2, 3, 4, 5, 6, 7, 8],
+    [3, 4, 5, 6, 7, 8, 9],
+    [4, 5, 6, 7, 8, 9, 10],
+    [5, 6, 7, 8, 9, 10, 1],
+    [6, 7, 8, 9, 10, 1, 2],
+    [7, 8, 9, 10, 1, 2, 3],
+    [8, 9, 10, 1, 2, 3, 4],
+    [9, 10, 1, 2, 3, 4, 5],
+]
+
+
+def test4_1():
+    for el in block_splitting(10, 9, C1):
+        print(el)
+
+
+# test5_1
+def test5_1():
+    print(DCT([8, 16, 24, 32, 40, 48, 56, 64]))
+
+
+# test5_2
+def test5_2():
+    v = [
+        float(random.randrange(-10**5, 10**5))
+        for _ in range(random.randrange(1, 128))
+    ]
+    v2 = IDCT(DCT(v))
+    assert (all(math.isclose(v[i], v2[i]) for i in range(len(v))))
+
+
+# test5_3
+A = [
+    [140, 144, 147, 140, 140, 155, 179, 175],
+    [144, 152, 140, 147, 140, 148, 167, 179],
+    [152, 155, 136, 167, 163, 162, 152, 172],
+    [168, 145, 156, 160, 152, 155, 136, 160],
+    [162, 148, 156, 148, 140, 136, 147, 162],
+    [147, 167, 140, 155, 155, 140, 136, 162],
+    [136, 156, 123, 167, 162, 144, 140, 147],
+    [148, 155, 136, 155, 152, 147, 147, 136],
+]
+
+A_hat = [
+    [1210.000, -17.997, 14.779, -8.980, 23.250, -9.233, -13.969, -18.937],
+    [20.538, -34.093, 26.330, -9.039, -10.933, 10.731, 13.772, 6.955],
+    [-10.384, -23.514, -1.854, 6.040, -18.075, 3.197, -20.417, -0.826],
+    [-8.105, -5.041, 14.332, -14.613, -8.218, -2.732, -3.085, 8.429],
+    [-3.250, 9.501, 7.885, 1.317, -11.000, 17.904, 18.382, 15.241],
+    [3.856, -2.215, -18.167, 8.500, 8.269, -3.608, 0.869, -6.863],
+    [8.901, 0.633, -2.917, 3.641, -1.172, -7.422, -1.146, -1.925],
+    [0.049, -7.813, -2.425, 1.590, 1.199, 4.247, -6.417, 0.315],
+]
+
+
+def test5_3():
+    print(DCT2(8, 8, A))
+
+
+# test5_4
+def test5_4():
+    m = random.randrange(1, 5)
+    n = random.randrange(1, 5)
+    A = [[float(random.randrange(-10**5, 10**5)) for _ in range(n)]
+         for _ in range(m)]
+    A2 = IDCT2(m, n, DCT2(m, n, A))
+    assert (all(
+        math.isclose(A[i][j], A2[i][j]) for i in range(m) for j in range(n)))
+
+
+# test5_5
+def test5_5():
+    for i in range(56):
+        print(redalpha(i))
+
+
+# test5_6
+def test5_6():
+    M8 = [[ncoeff8(i, j) for j in range(8)] for i in range(8)]
+
+    def M8_to_str(M8):
+
+        def for1(s, i):
+            return f"{'+' if s >= 0 else '-'}{i:d}"
+
+        return "\n".join(" ".join(for1(s, i) for (s, i) in row) for row in M8)
+
+    print(M8_to_str(M8))
+
+
+mat_index = [
+    [+4, +4, +4, +4, +4, +4, +4, +4],
+    [+1, +3, +5, +7, -7, -5, -3, -1],
+    [+2, +6, -6, -2, -2, -6, +6, +2],
+    [+3, -7, -1, -5, +5, +1, +7, -3],
+    [+4, -4, -4, +4, +4, -4, -4, +4],
+    [+5, -1, +7, +3, -3, -7, +1, -5],
+    [+6, -2, +2, -6, -6, +2, -2, +6],
+    [+7, -5, +3, -1, +1, -3, +5, -7],
+]
+
+
+# test5_7
+def test5_7():
+    print(DCT_Chen(A))
+
+
+# test5_8
+def test5_8():
+    print(IDCT_Chen(A_hat))
+
+
+# test6_1
+# test6_2
+# test6_3
+def test6_3():
+    print(Qmatrix(isY=True, phi=50))
+    print(Qmatrix(isY=False, phi=60))
+
+
+# test7_1
+def test7_1():
+    for el in zigzag(A):
+        print(el)
+
+
+# test7_2
+def test7_2():
+    for el in rle0([0, 0, 4, 0, 0, 0, 7, 1, 0, 2, 0, 0]):
+        print(el)
