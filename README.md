@@ -32,9 +32,14 @@ The goal of this project is to write a JPEG-like image encoder/decoder. This is 
 - during the third week, we will consider the RLE & arithmetic coding.
 
 
-
+## Professors
+- [Pierre-Yves Strub](http://www.strub.nu/)
 
 ## Contributors
+- [Yubo Cai](https://github.com/yubocai-poly)
 
-This project exists thanks to all the people who contribute. 
-<a href="https://github.com/yubocai-poly/CSE102-Advanced-Programming-Fianl-Project/network/dependencies)"><img src="https://opencollective.com/standard-readme/contributors.svg?width=890&button=false" /></a>
+## Tools of this course
+VScode, Python, Numpy, matplotlib, mathematical analysis
+
+## Copyright
+Copyright by Pierre-Yves Strub, Yubo Cai, Ecole Polytechnique
