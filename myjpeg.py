@@ -666,6 +666,11 @@ def DCT_Chen(A):
 
 
 # Exercise 5_8
+"""
+I try to solve this question with a multiplication of 7*8*8*2=896 times which is the algorithms provided in the instruction,
+However, I heard there is a method with 352 times but I don't really know how to intepret in this method. But I tried my best
+and this one works probablely.
+"""
 def matrix_change():
     C1 = matrix(8)
     C = zero_matrix(8, 8)

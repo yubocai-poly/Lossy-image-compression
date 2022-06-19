@@ -29,15 +29,15 @@ Exercise 5_1 - DCT(v) - PASS
 Exercise 5_2 - IDCT(v) - PASS
 Exercise 5_3 - DCT2(m, n, A) - PASS
 Exercise 5_4 - IDCT2(m, n, A) - PASS
-Exercise 5_5 - redalpha(i) 
-Exercise 5_6 - ncoeff8(i, j) 
-Exercise 5_7 - DCT_Chen(A) 
-Exercise 5_8 - IDCT_Chen(A) 
+Exercise 5_5 - redalpha(i) - check
+Exercise 5_6 - ncoeff8(i, j) - check
+Exercise 5_7 - DCT_Chen(A) - check
+Exercise 5_8 - IDCT_Chen(A) - check
 
-Exercise 6_1 - quantization(A, Q) 
-Exercise 6_2 - quantizationI(A, Q)
-Exercise 6_3 - Qmatrix(isY, phi)
-
+Exercise 6_1 - quantization(A, Q) - PASS
+Exercise 6_2 - quantizationI(A, Q) - PASS
+Exercise 6_3 - Qmatrix(isY, phi) - check
+ 
 Exercise 7_1 - zigzag(A) - PASS
 Exercise 7_2 - rle0(g) - PASS
 """
