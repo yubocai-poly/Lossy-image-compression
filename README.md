@@ -41,5 +41,7 @@ The goal of this project is to write a JPEG-like image encoder/decoder. This is 
 ## Tools of this course
 VScode, Python, Numpy, matplotlib, mathematical analysis
 
+In this project, you need some basic knowledge about Linear Algebra like Matrix multplication and Fouier Transformation. However **Numpy** is forbiddened in this project.
+
 ## Copyright
 Copyright by Pierre-Yves Strub, Yubo Cai, Ecole Polytechnique
